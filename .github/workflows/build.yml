@@ -1,0 +1,22 @@
+name: Build APK
+on: [push, workflow_dispatch]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: unzip -q PieVM.zip
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - run: yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses > /dev/null || true
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: 8.9
+      - run: gradle :app:assembleDebug --no-daemon
+        working-directory: PieVM
+      - uses: actions/upload-artifact@v4
+        with:
+          name: PieVM-apk
+          path: PieVM/app/build/outputs/apk/debug/*.apk
